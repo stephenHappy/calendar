@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<link rel="stylesheet" href="calendar.css">
+</head>
+<body>
+	<main>
+		<h4>Canlendar</h4>
+		<input id="dateInput" type="text" readonly placeholder="选择日期">
+	</main>
+</body>
+<script src="calendar.js"></script>
+<script>
+	var oDateInput = document.getElementById('dateInput');
+	dateInput.value = '2015-10-05';
+	oDateInput.onclick = function(e) {
+		calendar(e);
+	}
+	// oDateInput.click();
+</script>
+</html>

@@ -1,0 +1,207 @@
+*{margin:0;padding:0;outline:none;box-sizing: border-box;}
+ul{list-style:none;}
+h4{margin:10px;}
+input{position:relative;border:1px solid #ddd;}
+input:focus{border-color:orange;}
+button{border: none;cursor: pointer;}
+#dateInput{margin: 10px;padding: 2px 4px;cursor: pointer;display: block;}
+main{
+	height: 2000px;
+}
+
+$blue: #2196f3;
+$lightGreen: #AED581;
+$deepGreen: #8BC34A;
+$inputWidth: 50px;
+@mixin clearfix {
+	zoom: 1;
+	&::after{
+		content: '';
+		display: block;
+		clear: both;
+	}
+}
+
+
+#calendar{
+	// position: relative;
+	position: fixed;
+	float: left;
+	margin: 5px 0;
+	padding: 15px;
+	border-radius: 4px;
+	width: 240px;
+	font: 12px 'Microsoft Yahei',STHei,Arial;
+	color: #666;
+	background: #fff;
+	box-shadow: 0 0 8px rgba(#000, .15);
+
+	& .select-box{
+		overflow: hidden;
+		position: relative;
+		display: inline-block;
+		width: $inputWidth + 54px;
+		height: 20px;
+		padding: 0 5px;
+		margin-bottom: 10px;
+		& + .select-box{
+			margin-left: 2px;
+		}
+		& .handler-btn{
+			float: left;
+			width: 18px;
+			height: 18px;
+			margin-top: 1px;
+			border-radius: 2px;
+			color: #fff;
+			background: #fff;
+		}
+		& input{
+			float: left;
+			margin: 0 4px;
+			width: 50px;
+			height: 20px;
+			border-radius: 2px;
+			text-align: center;
+			color: #777;
+		}
+	}
+
+	.icon{
+		position: relative;
+		background: #fff;
+		border-radius: 4px;
+		transition: all .3s ease;
+		&.icon-arrow-left, &.icon-arrow-right{
+			&::before, &::after{
+				content: '';
+				position: absolute;
+				width: 10px;
+				height: 4px;
+				top: 50%;
+				margin-top: -2px;
+				border-radius: 2px;
+				background: $lightGreen;
+				transition: all .3s ease;
+			}
+			&:hover{
+				background: $lightGreen;
+				&::before, &::after{
+					background: #fff;
+				}
+			}
+		}
+		&.icon-arrow-left{
+			&::before, &::after{
+				left: 4px;
+				transform-origin: 2px 2px;
+			}
+			&::before{
+				transform: rotate(-45deg);
+			}
+			&::after{
+				transform: rotate(45deg);
+			}
+		}
+		&.icon-arrow-right{
+			&::before, &::after{
+				right: 4px;
+				transform-origin: 8px 2px;
+			}
+			&::before{
+				transform: rotate(45deg);
+			}
+			&::after{
+				transform: rotate(-45deg);
+			}
+		}
+	}
+}
+
+#calendar-week{
+	width: 100%;
+	@include clearfix;
+	& li{
+		position: relative;
+		z-index: 0;
+		float: left;
+		width: 30px;
+		height: 30px;
+		font-size: 12px;
+		text-align: center;
+		line-height: 32px;
+		border-radius: 4px;
+		cursor: default;
+		-webkit-animation: scale .4s ease;
+		transition: color .2s ease;
+		&.on{
+			background: $deepGreen;
+			color: #fff;
+			box-shadow: 0 0 6px rgba(darken($deepGreen, 15%), .8) inset;
+		}
+		&.item{
+			cursor: pointer;
+			&:hover{
+				z-index: 9;
+				box-shadow: none;
+				box-shadow: 0 0 6px rgba($lightGreen, .75);
+			}
+		}
+	}
+}
+
+#calendar-week-head{
+	background: $lightGreen;
+	font-weight: bold;
+	color: #fff;
+	@include clearfix;
+	box-shadow: 0 0 4px rgba(#333, .25);
+	margin: {
+		left: -18px;
+		right: -18px;
+		bottom: 4px;
+	}
+	padding: {
+		left: 18px;
+		right: 18px;
+	}
+}
+#calendar-week-table{
+	@include clearfix;
+}
+
+#calendar-week + #btnBox{
+	margin: 10px -5px 0;
+	display: flex;
+	& button{
+		display: block;
+		flex: 1;
+		height: 24px;
+		font-size: 12px;
+		background: darken($lightGreen, 10%);
+		color: #fff;
+		margin: 0 5px;
+		border-radius: 3px;
+		transition: all .3s ease;
+		&:hover{
+			background: darken($lightGreen, 20%);
+			color: #fff;
+		}
+		& + button{
+			background: #eee;
+			color: #888;
+			&:hover{
+				background: darken(#eee, 5%);
+				color: #666;
+			}
+		}
+
+	}
+}
+
+@-webkit-keyframes scale{
+	0%{transform: scale(0);}
+	65%{transform: scale(1);}
+	85%{transform: scale(.8);}
+	100%{transform: scale(1)};
+}
