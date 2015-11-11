@@ -132,8 +132,6 @@ $inputWidth: 50px;
 		line-height: 32px;
 		border-radius: 4px;
 		cursor: default;
-		-webkit-animation: scale .4s ease;
-		transition: color .2s ease;
 		&.on{
 			background: $deepGreen;
 			color: #fff;
@@ -141,6 +139,11 @@ $inputWidth: 50px;
 		}
 		&.item{
 			cursor: pointer;
+			-webkit-animation-name: scale;
+			-webkit-animation-duration: .4s;
+			-webkit-animation-time-function: ease;
+			-webkit-animation-fill-mode: both;
+			transition: color .2s ease;
 			&:hover{
 				z-index: 9;
 				box-shadow: none;
@@ -149,6 +152,11 @@ $inputWidth: 50px;
 		}
 	}
 }
+// @for $i from 1 through 31 {
+// 	.item:nth-child(#{$i}){
+// 		-webkit-animation-delay: if($i / 2);
+// 	}
+// }
 
 #calendar-week-head{
 	background: $lightGreen;
@@ -200,8 +208,8 @@ $inputWidth: 50px;
 }
 
 @-webkit-keyframes scale{
-	0%{transform: scale(0);}
-	65%{transform: scale(1);}
-	85%{transform: scale(.8);}
+	0%{transform: scale(0);box-shadow: 0 0 8px rgba(#333, .2) inset;}
+	65%{transform: scale(1);box-shadow: 0 0 8px rgba(#333, .2) inset;}
+	85%{transform: scale(.8);box-shadow: 0 0 8px rgba(#333, .2) inset;}
 	100%{transform: scale(1)};
 }

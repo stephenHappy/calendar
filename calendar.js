@@ -120,6 +120,7 @@
 				var index = i - w1 + 1;
 				li.innerHTML = index >=1 ? index : '';
 				li.className = index >= 1 ? 'item' : '';
+				li.style.webkitAnimationDelay = Math.round(Math.random() * 5) / 20 + 's';
 				if (date.year == defaultDate.year && date.month == defaultDate.month && index == defaultDate.day) {
 					li.classList.add('on');
 				}
