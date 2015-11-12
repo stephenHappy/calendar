@@ -10,7 +10,8 @@
 
 	var oInput = e.target;
 	// default date object
-	var defaultDate = _strToObj(oInput.value) || _strToObj(_dateToStr(new Date()));
+	var inputValue = oInput.value || _dateToStr(new Date());
+	var defaultDate = _strToObj(inputValue);
 	var defaultDateCopy = {};
 	for (var i in defaultDate) {
 		defaultDateCopy[i] = defaultDate[i];
