@@ -8,6 +8,10 @@ Also U need an `<input readonly>` element , then bind the **click event** on it,
 
 ```javascript
     inputDom.onclick = function() {
-        calendar(e);
+        calendar({/* options here */});
+    }
+
+    options = {
+        future: ture          // whether the future days can be selected or not
     }
 ```
