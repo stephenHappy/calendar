@@ -161,6 +161,7 @@
 				var me = this;
 				me.calendar = create._init();
 				me.calendar.addEventListener('click', me._bind, false);
+				me.calendar.addEventListener('change', me._bind, false);
 				document.addEventListener('keyup', me._bind, false);
 			},
 			_bind: function(e) {
@@ -169,9 +170,9 @@
 					case 'click':
 						handler._clickHandler(dom);
 						break;
-					// case 'input':
-					// 	handler._changeHandler(dom);
-					// 	break;
+					case 'change':
+						handler._changeHandler(dom);
+						break;
 					case 'keyup':
 						handler._keyUpHandler(e);
 						break;
@@ -179,6 +180,18 @@
 			},
 			_keyUpHandler: function(e) {
 				e.keyCode == 27 && handler._off();
+			},
+			_changeHandler: function(input) {
+				var me = this;
+				var id = input.id;
+				me.date[id.split(/-/)[1]] = input.value;
+				me._repaint();
+			},
+			_clickHandler: function(dom) {
+				var me = this;
+				dom.classList.contains('handler-btn') && me._changeYearMonth(dom);
+				dom.classList.contains('item') && me._selectDay(dom);
+				dom.classList.contains('submit-btn') && me._submit(dom);
 			},
 			_changeYearMonth: function(dom) {
 				var me = this;
@@ -217,6 +230,9 @@
 					}
 					me.date.month = input.value;
 				}
+			},
+			_repaint: function() {
+				var me = this;
 				var weekTable = document.getElementById('calendar-week-table');
 				weekTable.innerHTML = '';
 				var weekDays = create._renderDays(me.date);
@@ -235,12 +251,6 @@
 				var type = dom.getAttribute('data-handle');
 				oInput.value = type == 'sure' ? _objToStr(me.date) : _objToStr(defaultDateCopy)
 				me._off()
-			},
-			_clickHandler: function(dom) {
-				var me = this;
-				dom.classList.contains('handler-btn') && me._changeYearMonth(dom);
-				dom.classList.contains('item') && me._selectDay(dom);
-				dom.classList.contains('submit-btn') && me._submit(dom);
 			},
 			_off: function() {
 				var me = this;
