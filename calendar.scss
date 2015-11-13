@@ -21,6 +21,9 @@ $inputWidth: 50px;
 		clear: both;
 	}
 }
+.disabled{
+	cursor: not-allowed!important;
+}
 
 
 #calendar{
@@ -74,6 +77,8 @@ $inputWidth: 50px;
 		transition: all .3s ease;
 		&.icon-arrow-left, &.icon-arrow-right{
 			&::before, &::after{
+				left: 4px;
+				transform-origin: 2px 2px;
 				content: '';
 				position: absolute;
 				width: 10px;
@@ -84,6 +89,12 @@ $inputWidth: 50px;
 				background: $lightGreen;
 				transition: all .3s ease;
 			}
+			&::before{
+				transform: rotate(-45deg);
+			}
+			&::after{
+				transform: rotate(45deg);
+			}
 			&:hover{
 				background: $lightGreen;
 				&::before, &::after{
@@ -91,29 +102,8 @@ $inputWidth: 50px;
 				}
 			}
 		}
-		&.icon-arrow-left{
-			&::before, &::after{
-				left: 4px;
-				transform-origin: 2px 2px;
-			}
-			&::before{
-				transform: rotate(-45deg);
-			}
-			&::after{
-				transform: rotate(45deg);
-			}
-		}
 		&.icon-arrow-right{
-			&::before, &::after{
-				right: 4px;
-				transform-origin: 8px 2px;
-			}
-			&::before{
-				transform: rotate(45deg);
-			}
-			&::after{
-				transform: rotate(-45deg);
-			}
+			transform: rotate(180deg);
 		}
 	}
 }
@@ -148,6 +138,12 @@ $inputWidth: 50px;
 				z-index: 9;
 				box-shadow: none;
 				box-shadow: 0 0 6px rgba($lightGreen, .75);
+			}
+			&.disabled{
+				color: #ddd;
+				&:hover{
+					box-shadow: none;
+				}
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Document</title>
+	<title>Canlendar</title>
 	<link rel="stylesheet" href="calendar.css">
 </head>
 <body>
@@ -15,8 +15,10 @@
 <script>
 	var oDateInput = document.getElementById('dateInput');
 	// dateInput.value = '2015-10-05';
-	oDateInput.onclick = function(e) {
-		calendar(e);
+	oDateInput.onclick = function() {
+		calendar({
+			future: false			// whether the future days can be selected or not
+		});
 	}
 	oDateInput.click();
 </script>
