@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Canlendar</title>
+	<link rel="stylesheet" href="calendar.css">
+</head>
+<body>
+	<main>
+		<h4 id="title">Canlendar</h4>
+		<!-- <input id="dateInput" type="text" readonly placeholder="选择日期" value="2016-01-02"> -->
+		<input id="dateInput" type="text" readonly placeholder="选择日期">
+	</main>
+</body>
+<script src="c_es5.js"></script>
+<script>
+	var myCalendar = new Calendar('#dateInput', {
+		// options here
+		defaultDate: new Date(),	// YYYYMMDD, Date
+	}, function() {
+		// callback here
+	});
+
+	document.getElementById('dateInput').click();
+</script>
+</html>

@@ -6,7 +6,9 @@ input:focus{border-color:orange;}
 button{border: none;cursor: pointer;}
 #dateInput{margin: 10px;padding: 2px 4px;cursor: pointer;display: block;}
 main{
+	width: 400px;
 	height: 2000px;
+	margin: 20px auto;
 }
 
 $blue: #2196f3;
@@ -27,8 +29,8 @@ $inputWidth: 50px;
 
 
 #calendar{
-	// position: relative;
-	position: fixed;
+	position: absolute;
+	// position: fixed;
 	float: left;
 	margin: 5px 0;
 	padding: 15px;
