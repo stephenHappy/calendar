@@ -16,7 +16,7 @@
 			let me = this;
 			me.dom 		= dom;
 			me.isInit   = false;
-			me.options  = options;
+			me.options  = options || {};
 			me.callback = callback;
 			me.dom.addEventListener('click', function() {
 				me._init();
