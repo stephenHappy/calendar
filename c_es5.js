@@ -12,8 +12,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
  */
 
 ;(function () {
-
-	// let Calendar = function(selector, options, callback) {
 	var Calendar = function () {
 		function Calendar(selector, options, callback) {
 			_classCallCheck(this, Calendar);
@@ -27,7 +25,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			var me = this;
 			me.dom = dom;
 			me.isInit = false;
-			me.options = options;
+			me.options = options || {};
 			me.callback = callback;
 			me.dom.addEventListener('click', function () {
 				me._init();
