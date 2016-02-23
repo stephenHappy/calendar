@@ -2,6 +2,10 @@
 
 var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 /*
  *	Calendar.js
  *
@@ -9,233 +13,253 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 
 ;(function () {
 
-	var Calendar = function Calendar(selector, options, callback) {
-		var dom = document.getElementById(selector.match(/^#(\w+)/)[1]);
-		if (!dom) {
-			console.warn('No Input Element Found');
-			return false;
-		}
+	// let Calendar = function(selector, options, callback) {
+	var Calendar = function () {
+		function Calendar(selector, options, callback) {
+			_classCallCheck(this, Calendar);
 
-		var me = this;
-		me.dom = dom;
-		me.isInit = false;
-		me.options = options;
-		me.callback = callback;
-		me.dom.addEventListener('click', function () {
-			me._init();
-		}, false);
-	};
-
-	Calendar.prototype._init = function () {
-		var me = this;
-
-		me.defaultDate = _dateFormat(me.dom.value || me.options.defaultDate || new Date(), 'object');
-
-		me.tempDate = {};
-		for (var k in me.defaultDate) {
-			me.tempDate[k] = me.defaultDate[k];
-		}
-
-		me._createDom(); // cerate dom
-		me._handler(); // add event listener
-	};
-
-	Calendar.prototype._createDom = function () {
-		var me = this;
-		if (!!document.getElementById('calendar')) {
-			document.getElementById('calendar').remove();
-		}
-
-		var year = _creSelectDom('calendar-year', me.defaultDate.y);
-		var month = _creSelectDom('calendar-month', me.defaultDate.m);
-
-		var week = _creWeekDom();
-		var weekTable = me._renderDays(me.defaultDate);
-		week.appendChild(weekTable);
-
-		var btns = document.createElement('div');
-		btns.id = 'btnBox';
-		btns.innerHTML = '<button class=\"submit-btn\" data-handle=\"apply\">Apply</button><button class=\"submit-btn\" data-handle=\"cancel\">Cancel</button>';
-
-		var calendar = document.createElement('div');
-		calendar.id = 'calendar';
-		calendar.appendChild(year);
-		calendar.appendChild(month);
-		calendar.appendChild(week);
-		calendar.appendChild(btns);
-
-		// set the calendar at the correct position
-		me._position(calendar, me.dom);
-		// append calendar element to the document
-		document.body.appendChild(calendar);
-		me.calendar = calendar;
-	};
-
-	Calendar.prototype._renderDays = function (date) {
-		var me = this;
-		var year = date.y,
-		    month = date.m;
-		var isBigYear = !(year % 4) && !!(year % 100) || !(year % 400);
-		var total = undefined;
-		if (month > 7 && !(month % 2) || month < 8 && month % 2) {
-			total = 31;
-		} else {
-			if (month == 2) {
-				total = isBigYear ? 29 : 28;
-			} else {
-				total = 30;
+			var dom = document.getElementById(selector.match(/^#(\w+)/)[1]);
+			if (!dom) {
+				console.warn('No Input Element Found');
+				return false;
 			}
+
+			var me = this;
+			me.dom = dom;
+			me.isInit = false;
+			me.options = options;
+			me.callback = callback;
+			me.dom.addEventListener('click', function () {
+				me._init();
+			}, false);
 		}
 
-		var temp = new Date(year, month - 1, 1); // the first day of this month
-		var firstDay = temp.getDay();
-		var ul = document.createElement('ul');
-		ul.id = 'calendar-week-table';
-		for (var i = 0; i < total + firstDay; i++) {
-			var li = document.createElement('li');
-			var index = i + 1 - firstDay;
-			li.innerHTML = index >= 1 ? index : null;
-			li.className = index >= 1 ? 'item' : null;
+		_createClass(Calendar, [{
+			key: '_init',
+			value: function _init() {
+				var me = this;
 
-			li.style.webkitAnimationDelay = Math.round(Math.random() * 5) / 20 + 's';
-			li.style.animationDelay = Math.round(Math.random() * 5) / 20 + 's';
+				me.defaultDate = _dateFormat(me.dom.value || me.options.defaultDate || new Date(), 'object');
 
-			if (date.y == me.defaultDate.y && date.m == me.defaultDate.m && index == me.defaultDate.d) {
-				li.classList.add('on');
+				me.tempDate = {};
+				for (var k in me.defaultDate) {
+					me.tempDate[k] = me.defaultDate[k];
+				}
+
+				me._createDom(); // cerate dom
+				me._handler(); // add event listener
 			}
-			ul.appendChild(li);
-		}
-		return ul;
-	};
+		}, {
+			key: '_createDom',
+			value: function _createDom() {
+				var me = this;
+				if (!!document.getElementById('calendar')) {
+					document.getElementById('calendar').remove();
+				}
 
-	Calendar.prototype._position = function (calendar, target) {
-		// the calendar dom size is about 240 * 300, set in css
-		// rect: target position info
-		var rect = target.getBoundingClientRect();
+				var year = _creSelectDom('calendar-year', me.defaultDate.y);
+				var month = _creSelectDom('calendar-month', me.defaultDate.m);
 
-		var win = {
-			w: document.body.clientWidth,
-			h: document.documentElement.clientWidth
-		};
+				var week = _creWeekDom();
+				var weekTable = me._renderDays(me.defaultDate);
+				week.appendChild(weekTable);
 
-		var top = rect.top + rect.height;
-		var left = rect.left;
+				var btns = document.createElement('div');
+				btns.id = 'btnBox';
+				btns.innerHTML = '<button class=\"submit-btn\" data-handle=\"apply\">Apply</button><button class=\"submit-btn\" data-handle=\"cancel\">Cancel</button>';
 
-		if (win.w - rect.left < 240) {
-			// in case the target-input is at the right side of the window
-			calendar.style.right = win.w - rect.left - rect.width + 'px';
-		} else {
-			calendar.style.left = left + 'px';
-		}
+				var calendar = document.createElement('div');
+				calendar.id = 'calendar';
+				calendar.appendChild(year);
+				calendar.appendChild(month);
+				calendar.appendChild(week);
+				calendar.appendChild(btns);
 
-		if (win.h - top < 300) {
-			calendar.style.bottom = win.h - rect.top + 'px';
-		} else {
-			calendar.style.top = top + 'px';
-		}
-	};
+				// set the calendar at the correct position
+				me._position(calendar, me.dom);
+				// append calendar element to the document
+				document.body.appendChild(calendar);
+				me.calendar = calendar;
+			}
+		}, {
+			key: '_renderDays',
+			value: function _renderDays(date) {
+				var me = this;
+				var year = date.y,
+				    month = date.m;
+				var isBigYear = !(year % 4) && !!(year % 100) || !(year % 400);
+				var total = undefined;
+				if (month > 7 && !(month % 2) || month < 8 && month % 2) {
+					total = 31;
+				} else {
+					if (month == 2) {
+						total = isBigYear ? 29 : 28;
+					} else {
+						total = 30;
+					}
+				}
 
-	Calendar.prototype._handler = function () {
-		var me = this;
-		me.events = [['click', '.handler-btn', '_changeYearMonth'], ['click', '.item', '_selectDay'], ['click', '.submit-btn', '_submit']];
+				var temp = new Date(year, month - 1, 1); // the first day of this month
+				var firstDay = temp.getDay();
+				var ul = document.createElement('ul');
+				ul.id = 'calendar-week-table';
+				for (var i = 0; i < total + firstDay; i++) {
+					var li = document.createElement('li');
+					var index = i + 1 - firstDay;
+					li.innerHTML = index >= 1 ? index : null;
+					li.className = index >= 1 ? 'item' : null;
 
-		var events = me.events;
-		var _iteratorNormalCompletion = true;
-		var _didIteratorError = false;
-		var _iteratorError = undefined;
+					li.style.webkitAnimationDelay = Math.round(Math.random() * 5) / 20 + 's';
+					li.style.animationDelay = Math.round(Math.random() * 5) / 20 + 's';
 
-		try {
-			var _loop = function _loop() {
-				var event = _step.value;
+					if (date.y == me.defaultDate.y && date.m == me.defaultDate.m && index == me.defaultDate.d) {
+						li.classList.add('on');
+					}
+					ul.appendChild(li);
+				}
+				return ul;
+			}
+		}, {
+			key: '_position',
+			value: function _position(calendar, target) {
+				// the calendar dom size is about 240 * 300, set in css
+				// rect: target position info
+				var rect = target.getBoundingClientRect();
 
-				var ev = event[0],
-				    el = event[1],
-				    fn = event[2];
-				var fun = function fun(e) {
-					var collections = document.querySelectorAll(el);
-					if (_inArray(e.target, collections) < 0) return false;
-
-					me[fn].apply(me, [e]);
+				var win = {
+					w: document.body.clientWidth,
+					h: document.documentElement.clientWidth
 				};
-				me.calendar.removeEventListener(ev, fun, false);
-				me.calendar.addEventListener(ev, fun, false);
-			};
 
-			for (var _iterator = events[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-				_loop();
-			}
-		} catch (err) {
-			_didIteratorError = true;
-			_iteratorError = err;
-		} finally {
-			try {
-				if (!_iteratorNormalCompletion && _iterator.return) {
-					_iterator.return();
+				var top = rect.top + rect.height;
+				var left = rect.left;
+
+				if (win.w - rect.left < 240) {
+					// in case the target-input is at the right side of the window
+					calendar.style.right = win.w - rect.left - rect.width + 'px';
+				} else {
+					calendar.style.left = left + 'px';
 				}
-			} finally {
-				if (_didIteratorError) {
-					throw _iteratorError;
+
+				if (win.h - top < 300) {
+					calendar.style.bottom = win.h - rect.top + 'px';
+				} else {
+					calendar.style.top = top + 'px';
 				}
 			}
-		}
-	};
+		}, {
+			key: '_handler',
+			value: function _handler() {
+				var me = this;
+				me.events = [['click', '.handler-btn', '_changeYearMonth'], ['click', '.item', '_selectDay'], ['click', '.submit-btn', '_submit']];
 
-	Calendar.prototype._changeYearMonth = function (e) {
-		var me = this;
-		var btn = e.target;
-		var type = btn.getAttribute('data-handle');
-		var input = btn.parentNode.getElementsByTagName('input')[0];
-		var id = input.id;
-		var val = parseInt(input.value);
+				var events = me.events;
+				var _iteratorNormalCompletion = true;
+				var _didIteratorError = false;
+				var _iteratorError = undefined;
 
-		if (/year/.test(id)) {
-			if (type == 'minus') {
-				input.value -= 1;
-			} else {
-				input.value = ++val;
+				try {
+					var _loop = function _loop() {
+						var event = _step.value;
+
+						var ev = event[0],
+						    el = event[1],
+						    fn = event[2];
+						var fun = function fun(e) {
+							var collections = document.querySelectorAll(el);
+							if (_inArray(e.target, collections) < 0) return false;
+
+							me[fn].apply(me, [e]);
+						};
+						me.calendar.removeEventListener(ev, fun, false);
+						me.calendar.addEventListener(ev, fun, false);
+					};
+
+					for (var _iterator = events[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+						_loop();
+					}
+				} catch (err) {
+					_didIteratorError = true;
+					_iteratorError = err;
+				} finally {
+					try {
+						if (!_iteratorNormalCompletion && _iterator.return) {
+							_iterator.return();
+						}
+					} finally {
+						if (_didIteratorError) {
+							throw _iteratorError;
+						}
+					}
+				}
 			}
-			me.tempDate.y = parseInt(input.value);
-		} else {
-			if (type == 'minus') {
-				input.value = val == 1 ? 12 : --val;
-			} else {
-				input.value = val == 12 ? 1 : ++val;
+		}, {
+			key: '_changeYearMonth',
+			value: function _changeYearMonth(e) {
+				var me = this;
+				var btn = e.target;
+				var type = btn.getAttribute('data-handle');
+				var input = btn.parentNode.getElementsByTagName('input')[0];
+				var id = input.id;
+				var val = parseInt(input.value);
+
+				if (/year/.test(id)) {
+					if (type == 'minus') {
+						input.value -= 1;
+					} else {
+						input.value = ++val;
+					}
+					me.tempDate.y = parseInt(input.value);
+				} else {
+					if (type == 'minus') {
+						input.value = val == 1 ? 12 : --val;
+					} else {
+						input.value = val == 12 ? 1 : ++val;
+					}
+					me.tempDate.m = parseInt(input.value);
+				}
+
+				me._repaint();
 			}
-			me.tempDate.m = parseInt(input.value);
-		}
+		}, {
+			key: '_selectDay',
+			value: function _selectDay(e) {
+				var me = this;
+				var day = e.target;
 
-		me._repaint();
-	};
+				day.parentNode.getElementsByTagName('li')._removeClass('on');
+				day.classList.add('on');
+				me.defaultDate.d = _db(parseInt(day.innerHTML));
+				me.defaultDate.y = _db(me.tempDate.y);
+				me.defaultDate.m = _db(me.tempDate.m);
+			}
+		}, {
+			key: '_repaint',
+			value: function _repaint() {
+				var me = this;
+				document.getElementById('calendar-week-table').remove();
+				var weekTable = me._renderDays(me.tempDate);
+				document.getElementById('calendar-week').appendChild(weekTable);
+			}
+		}, {
+			key: '_submit',
+			value: function _submit(e) {
+				var me = this;
+				var btn = e.target;
+				var type = btn.getAttribute('data-handle');
+				type == 'apply' && (me.dom.value = _dateFormat(me.defaultDate, 'YYYY-MM-DD'));
+				me._cancel();
+			}
+		}, {
+			key: '_cancel',
+			value: function _cancel() {
+				var me = this;
+				me.calendar.remove();
+			}
+		}]);
 
-	Calendar.prototype._selectDay = function (e) {
-		var me = this;
-		var day = e.target;
-
-		day.parentNode.getElementsByTagName('li')._removeClass('on');
-		day.classList.add('on');
-		me.defaultDate.d = _db(parseInt(day.innerHTML));
-		me.defaultDate.y = _db(me.tempDate.y);
-		me.defaultDate.m = _db(me.tempDate.m);
-	};
-
-	Calendar.prototype._repaint = function () {
-		var me = this;
-		document.getElementById('calendar-week-table').remove();
-		var weekTable = me._renderDays(me.tempDate);
-		document.getElementById('calendar-week').appendChild(weekTable);
-	};
-
-	Calendar.prototype._submit = function (e) {
-		var me = this;
-		var btn = e.target;
-		var type = btn.getAttribute('data-handle');
-		type == 'apply' && (me.dom.value = _dateFormat(me.defaultDate, 'YYYY-MM-DD'));
-		me._cancel();
-	};
-	Calendar.prototype._cancel = function () {
-		var me = this;
-		me.calendar.remove();
-	};
+		return Calendar;
+	}();
 
 	function _dateFormat(date, format) {
 		if (date instanceof Date) {
