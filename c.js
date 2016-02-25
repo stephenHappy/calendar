@@ -6,8 +6,8 @@
 ;(function() {
 
 	class Calendar {
-		constructor(selector, options, callback) {
-			let dom = document.getElementById(selector.match(/^#(\w+)/)[1]);
+		constructor(options) {
+			let dom = document.getElementById(options.id.match(/^#(\w+)/)[1]);
 			if (!dom) {
 				console.warn('No Input Element Found');
 				return false;
@@ -17,7 +17,7 @@
 			me.dom 		= dom;
 			me.isInit   = false;
 			me.options  = options || {};
-			me.callback = callback;
+			me.callback = options.callback;
 			me.dom.addEventListener('click', function() {
 				me._init();
 			}, false)
@@ -204,7 +204,12 @@
 			let me = this;
 			let btn = e.target;
 			let type = btn.getAttribute('data-handle');
-			(type == 'apply') && (me.dom.value = _dateFormat(me.defaultDate, 'YYYY-MM-DD'));
+			var result = _dateFormat(me.defaultDate, 'YYYY-MM-DD')
+			if (type == 'apply') {
+				me.dom.value = result
+				me.callback && me.callback(result);
+			}
+
 			me._cancel();
 		}
 		_cancel() {

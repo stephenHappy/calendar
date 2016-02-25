@@ -16,7 +16,12 @@
 </body>
 <script src="c.js"></script>
 <script>
-	var myCalendar = new Calendar('#dateInput');
+	var myCalendar = new Calendar({
+		id: '#dateInput',			// id selector, required!
+		callback: function(date) {	// callback
+			console.log(date);
+		}
+	});
 	document.getElementById('dateInput').click();
 </script>
 </html>

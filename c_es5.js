@@ -13,10 +13,10 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 
 ;(function () {
 	var Calendar = function () {
-		function Calendar(selector, options, callback) {
+		function Calendar(options) {
 			_classCallCheck(this, Calendar);
 
-			var dom = document.getElementById(selector.match(/^#(\w+)/)[1]);
+			var dom = document.getElementById(options.id.match(/^#(\w+)/)[1]);
 			if (!dom) {
 				console.warn('No Input Element Found');
 				return false;
@@ -26,7 +26,7 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 			me.dom = dom;
 			me.isInit = false;
 			me.options = options || {};
-			me.callback = callback;
+			me.callback = options.callback;
 			me.dom.addEventListener('click', function () {
 				me._init();
 			}, false);
@@ -245,7 +245,12 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 				var me = this;
 				var btn = e.target;
 				var type = btn.getAttribute('data-handle');
-				type == 'apply' && (me.dom.value = _dateFormat(me.defaultDate, 'YYYY-MM-DD'));
+				var result = _dateFormat(me.defaultDate, 'YYYY-MM-DD');
+				if (type == 'apply') {
+					me.dom.value = result;
+					me.callback && me.callback(result);
+				}
+
 				me._cancel();
 			}
 		}, {
