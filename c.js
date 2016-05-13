@@ -262,16 +262,12 @@
 	}
 	function _inArray(ele, arr) {
 		let n = arr.length;
-		let res = -1;
 		if (n > 0) {
 			for (let i = 0; i < n; i ++) {
-				if (ele === arr[i]) {
-					res = i;
-					break;
-				}
+				if (ele === arr[i]) return i;
 			}
 		}
-		return res;
+		return -1;
 	}
 	NodeList.prototype._removeClass =
 	HTMLCollection.prototype._removeClass = function(str) {
