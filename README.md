@@ -8,11 +8,11 @@ Also U need an `<input readonly>` element, and create the calendar like :
 
 ```javascript
     var myCalendar = new Calendar({
-            id: '#id-selector',     // required!
-            callback: function(date) {
-                // date is the calendar result
-            }
-        })
+        selector: '#dateInput',         // id selector only yet
+        date: new Date(),
+        // min: '2016-05-05',
+        max: '2016-05-20',
+    });
 ```
 
 Run `gulp` to change c.js into `es5`
