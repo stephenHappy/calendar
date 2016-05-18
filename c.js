@@ -1,110 +1,194 @@
 /*
- *	Calendar.js
+ *	Calendar.js - version 2.0
+ *	feature:
+ *		// todo
+ *		- double dateinputs supported (start_time & end_time)
  *
+ *	@liupd
  */
 
 ;(function() {
+	'use strict';
+	const CONFIG = {
+		type: 'single',					// type: single, double
+		date: new Date(),				// default date
+		sdate: new Date(),				// default start date
+		edate: new Date(),				// default end date
+		min: null,						// min date
+		max: null,						// max date
+		// limit:	null,					// date interval limit
+		weeks: ['柒', '壹', '贰', '叁', '肆', '伍', '陆']
+	}
 
-	class Calendar {
+	class Calendar{
 		constructor(options) {
-			let dom = document.getElementById(options.id.match(/^#(\w+)/)[1]);
-			if (!dom) {
-				console.warn('No Input Element Found');
-				return false;
+			var me = this;
+			if (!/^#\w+/.test(options.selector) || !document.querySelector(options.selector)) {
+				throw Error('Invalid ID selector');
 			}
 
-			let me = this;
-			me.dom 		= dom;
-			me.isInit   = false;
-			me.options  = options || {};
-			me.callback = options.callback;
-			me.dom.addEventListener('click', function() {
+			me.config = _extend(CONFIG, options);
+			me.dom 	  = document.querySelector(options.selector);
+
+			me.date = _formatDate(me.config.date, 'YYYY-MM-DD');
+
+			me.dom.addEventListener('click', function(e) {
+				me.input = e.target;
 				me._init();
 			}, false)
 		}
-
 		_init() {
-			let me = this;
+			var me = this;
+			me.defaultDate = _formatDate(me.date, 'object');
+			me.year  = me.defaultDate.y;
+			me.month = me.defaultDate.m;
+			me.day   = me.defaultDate.d;
 
-			me.defaultDate = _dateFormat(me.dom.value || me.options.defaultDate || new Date(), 'object');
-
-			me.tempDate = {};
-			for (let k in me.defaultDate) {
-				me.tempDate[k] = me.defaultDate[k];
-			}
-
-			me._createDom();			// cerate dom
-			me._handler();				// add event listener
+			me._createDom();
+			me._handler();
 		}
-
+		// date
+		get date() { return this._date; }
+		set date(value) {
+			this._date = value;
+			this.dom.value = value;
+		}
+		// year
+		get year() { return this._year; }
+		set year(value) {
+			if (isNaN(value) || !/^[1-9]\d{3}$/.test(value)) {
+				throw Error('Invalid year input')
+				return false;
+			}
+			this._year = value;
+			this.yearInput && (this.yearInput.value = value);
+			this._reRenderDays();
+		}
+		// month
+		get month() { return this._month; }
+		set month(value) {
+			if (isNaN(value) || !/^[1-9]\d?$/.test(value)) {
+				throw Error('Invalid month input')
+				return false;
+			}
+			if (value > 12 || value < 1) {
+				return false;
+			}
+			this._month = value;
+			this.monthInput && (this.monthInput.value = value);
+			this._reRenderDays();
+		}
+		// day
 		_createDom() {
-			let me = this;
-			if (!!document.getElementById('calendar')) {
-				document.getElementById('calendar').remove();
+			var me = this;
+			if (!!me.calendar) {
+				me.calendar.remove();
 			}
 
-			let year  = _creSelectDom('calendar-year', me.defaultDate.y);
-			let month = _creSelectDom('calendar-month', me.defaultDate.m);
+			var oYear  = me._createInputDom('year', me.defaultDate.y)
+			var oMonth = me._createInputDom('month', me.defaultDate.m);
+			var oWeek  = me._createWeekDom();
 
-			let week  = _creWeekDom();
-			let weekTable = me._renderDays(me.defaultDate);
-			week.appendChild(weekTable);
+			var oBtns  = document.createElement('div');
+			oBtns.id = 'btnBox';
+			oBtns.innerHTML = `<button class=\"submit-btn\" data-handle=\"apply\">Apply</button><button class=\"submit-btn\" data-handle=\"cancel\">Cancel</button>`;
 
-			let btns  = document.createElement('div');
-			btns.id = 'btnBox';
-			btns.innerHTML = '<button class=\"submit-btn\" data-handle=\"apply\">Apply</button><button class=\"submit-btn\" data-handle=\"cancel\">Cancel</button>';
+			var oCalendar = document.createElement('div');
+			oCalendar.id = 'calendar';
+			oCalendar.appendChild(oYear);
+			oCalendar.appendChild(oMonth);
+			oCalendar.appendChild(oWeek);
+			oCalendar.appendChild(oBtns);
 
-			let calendar = document.createElement('div');
-			calendar.id = 'calendar';
-			calendar.appendChild(year);
-			calendar.appendChild(month);
-			calendar.appendChild(week);
-			calendar.appendChild(btns);
+			me._position(oCalendar, me.input);
 
-			// set the calendar at the correct position
-			me._position(calendar, me.dom);
-			// append calendar element to the document
-			document.body.appendChild(calendar);
-			me.calendar = calendar;
+			document.body.appendChild(oCalendar);
+			me.calendar = oCalendar;
 		}
+		_createInputDom(type, value) {
+			var me = this;
+			var oDiv = document.createElement('div');
+			oDiv.className = 'select-box';
+			var oBtn1 = document.createElement('button');
+			oBtn1.className = 'handler-btn icon icon-arrow-left';
+			oBtn1.setAttribute('data-type', '-1');
+			oBtn1.setAttribute('data-prop', type);
+			var oInput = document.createElement('input');
+			oInput.id = 'calendar-' + type;
+			oInput.className = 'calendar-ym-input'
+			oInput.setAttribute('data-prop', type);
+			var oBtn2 = document.createElement('button');
+			oBtn2.className = 'handler-btn icon icon-arrow-right';
+			oBtn2.setAttribute('data-type', '1');
+			oBtn2.setAttribute('data-prop', type);
 
-		_renderDays(date) {
-			let me = this;
-			let year  = date.y,
-				month = date.m;
-			let isBigYear = !(year % 4) && !!(year % 100) || !(year % 400);
-			let total;
+			me[type + 'Input'] = oInput;
+			me[type] = value;
+
+			oDiv.appendChild(oBtn1);
+			oDiv.appendChild(oInput);
+			oDiv.appendChild(oBtn2);
+			return oDiv;
+		}
+		_createWeekDom() {
+			var me = this;
+			var oHead = document.createElement('ul');
+			oHead.id  = 'calendar-week-head';
+			oHead.innerHTML = '';
+			me.config.weeks.forEach(function(week) {
+				oHead.innerHTML += `<li>${week}</li>`
+			})
+			var oTable = me._renderDays();
+
+			var oDiv = document.createElement('div');
+			oDiv.id = 'calendar-week';
+			oDiv.appendChild(oHead);
+			oDiv.appendChild(oTable);
+			me.weekDom = oDiv;
+			return oDiv;
+		}
+		_renderDays() {
+			var me 	  = this,
+				year  = me.year,
+				month = me.month;
+			var isBigYear = !(year % 4) && !!(year % 100) || !(year % 400);
+			var total;
 			if ( (month > 7 && !(month % 2)) || (month < 8 && month % 2) ) {
 				total = 31;
 			}else {
-				if (month == 2) {
-					total = isBigYear ? 29 : 28;
-				}else {
-					total = 30;
-				}
+				total = month == 2 ? (isBigYear ? 29 : 28) : 30;
 			}
 
-			let temp = new Date(year, month-1, 1);	// the first day of this month
-			let firstDay = temp.getDay();
-			let ul = document.createElement('ul');
-			ul.id = 'calendar-week-table';
-			for (let i = 0; i < total + firstDay; i ++) {
-				let li = document.createElement('li');
-				let index = i + 1 - firstDay;
-				li.innerHTML = index >= 1 ? index : null;
-				li.className = index >= 1 ? 'item' : null;
+			var firstDay = (new Date(year, month-1, 1)).getDay();
+			var oUl = document.createElement('ul');
+			oUl.id = 'calendar-week-table';
+			for (let i = 1; i < total + firstDay + 1; i ++) {
+				let oLi = document.createElement('li');
+				let index = i - firstDay;
+				if (index > 0) {
+					oLi.innerHTML = index;
+					oLi.className = 'item';
+					!me._dateValidity(year, month, index) && oLi.classList.add('disabled');
 
-				li.style.webkitAnimationDelay = Math.round(Math.random() * 5) / 20 + 's';
-				li.style.animationDelay = Math.round(Math.random() * 5) / 20 + 's';
+					oLi.style.webkitAnimationDelay = Math.round(Math.random() * 5) / 20 + 's';
+					oLi.style.animationDelay = Math.round(Math.random() * 5) / 20 + 's';
 
-				if (date.y == me.defaultDate.y && date.m == me.defaultDate.m && index == me.defaultDate.d) {
-					li.classList.add('on');
+					if (year == me.defaultDate.y && month == me.defaultDate.m && index == me.day) {
+						oLi.classList.add('on');
+					}
 				}
-				ul.appendChild(li);
+				oUl.appendChild(oLi);
 			}
-			return ul;
+			return oUl;
 		}
-
+		_dateValidity(y, m, d) {
+			var me = this;
+			if (!me.config.min && !me.config.max) {
+				return true;
+			}
+			var now = new Date(y, m-1, d);
+			return !(me.config.max && now > new Date(me.config.max) || me.config.min && now < new Date(me.config.min));
+		}
 		_position(calendar, target) {
 			// the calendar dom size is about 240 * 300, set in css
 			// rect: target position info
@@ -130,23 +214,20 @@
 				calendar.style.top = top + 'px';
 			}
 		}
-
 		_handler() {
-			let me = this;
+			var me = this;
 			me.events = [
 				['click', '.handler-btn', '_changeYearMonth']
+				,['keyup', '.calendar-ym-input', '_inputYearMonth']
 				,['click', '.item', '_selectDay']
 				,['click', '.submit-btn', '_submit']
 			]
-
-			const events = me.events;
-			for (let event of events) {
+			for (let event of me.events) {
 				let ev = event[0],
 					el = event[1],
 					fn = event[2];
 				let fun = function(e) {
-					let collections = document.querySelectorAll(el);
-					if ( _inArray(e.target, collections) < 0 ) return false;
+					if (!_isTarget(e.target, el)) { return false };
 
 					me[fn].apply(me, [e])
 				}
@@ -154,139 +235,132 @@
 				me.calendar.addEventListener(ev, fun, false);
 			}
 		}
-
 		_changeYearMonth(e) {
-			let me  = this;
-			let btn = e.target;
-			let type = btn.getAttribute('data-handle');
-			let input = btn.parentNode.getElementsByTagName('input')[0];
-			let id 	= input.id;
-			let val = parseInt(input.value)
-
-			if (/year/.test(id)) {
-				if (type == 'minus') {
-					input.value -= 1;
-				}else {
-					input.value = ++val;
-				}
-				me.tempDate.y = parseInt(input.value);
-			}else {
-				if (type == 'minus') {
-					input.value = (val == 1 ? 12 : --val)
-				}else {
-					input.value = (val == 12 ? 1 : ++val)
-				}
-				me.tempDate.m = parseInt(input.value);
-			}
-
-			me._repaint();
+			var me = this;
+			var oBtn = e.target;
+			var type = oBtn.getAttribute('data-type');
+			var prop = oBtn.getAttribute('data-prop');
+			me[prop] = type > 0 ? me[prop] + 1 : me[prop] - 1;
 		}
-
+		_inputYearMonth(e) {
+			if (e.keyCode == 13) {
+				var me = this;
+				var oInput = e.target;
+				var prop = oInput.getAttribute('data-prop');
+				me[prop] = oInput.value;
+			}
+		}
+		_reRenderDays() {
+			var me = this;
+			if (me.weekDom) {
+				me.weekDom.childNodes[1].remove();
+				me.weekDom.appendChild(me._renderDays());
+			}
+		}
 		_selectDay(e) {
-			let me = this;
-			let day = e.target;
-
-			day.parentNode.getElementsByTagName('li')._removeClass('on');
-			day.classList.add('on');
-			me.defaultDate.d = _db(parseInt(day.innerHTML));
-			me.defaultDate.y = _db(me.tempDate.y);
-			me.defaultDate.m = _db(me.tempDate.m);
-		}
-
-		_repaint() {
-			let me = this;
-			document.getElementById('calendar-week-table').remove();
-			let weekTable = me._renderDays(me.tempDate);
-			document.getElementById('calendar-week').appendChild(weekTable);
-		}
-
-		_submit(e) {
-			let me = this;
-			let btn = e.target;
-			let type = btn.getAttribute('data-handle');
-			var result = _dateFormat(me.defaultDate, 'YYYY-MM-DD')
-			if (type == 'apply') {
-				me.dom.value = result
-				me.callback && me.callback(result);
+			var me = this;
+			var oItem = e.target;
+			if (oItem.classList.contains('disabled')) {
+				return false;
 			}
-
+			oItem.parentNode.childNodes._removeClass('on');
+			oItem.classList.add('on');
+			me.day = Number(oItem.innerHTML);
+			me.defaultDate.d = me.day;
+			me.defaultDate.y = me.year;
+			me.defaultDate.m = me.month;
+		}
+		_submit(e) {
+			var me = this;
+			var oBtn = e.target;
+			if (oBtn.getAttribute('data-handle') == 'apply') {
+				me.date = _formatDate(me.defaultDate, 'YYYY-MM-DD')
+			}
 			me._cancel();
 		}
 		_cancel() {
-			var me = this;
-			me.calendar.remove();
+			this.calendar.remove();
 		}
 	}
-	function _dateFormat(date, format) {
+
+
+
+	// utils
+	function _extend(target, object, isCover) {				// extend target with object
+		var temp = {};
+		isCover && (temp = target);
+		for (let k in target) {
+			if (object.hasOwnProperty(k)) {
+				temp[k] = object[k]
+			}else {
+				if (!isCover) {
+					temp[k] = target[k]
+				}
+			}
+		}
+		return temp;
+	}
+	function _formatDate(date, format) {					// format date into ['object' | 'YYYYMMDD']
+		var result = {};
 		if (date instanceof Date) {
-			date = {
+			result = {
 				y: _db(date.getFullYear()),
 				m: _db(date.getMonth() + 1),
 				d: _db(date.getDate())
 			}
+		}else if (typeof date == 'object') {
+			result = {
+				y: _db(date.y),
+				m: _db(date.m),
+				d: _db(date.d)
+			};
 		}else if (typeof date === 'string') {
-			let nums = date.match(/\d/g);
-			date = {
-				y: nums[0] + nums[1] + nums[2] + nums[3],
-				m: nums[4] + nums[5],
-				d: nums[6] + nums[7]
+			if (date.match(/^\d{4}-\d{2}-\d{2}$/) || date.match(/^\d{8}$/)) {
+				var nums = date.match(/\d/g);
+				result = {
+					y: nums[0] + nums[1] + nums[2] + nums[3],
+					m: nums[4] + nums[5],
+					d: nums[6] + nums[7]
+				}
+			}else {
+				throw Error('date format not supported')
 			}
 		}
 
 		if (format == 'object') {
-			return date;
+			return {y: Number(result.y), m: Number(result.m), d: Number(result.d)};
 		}else {
-			return format.replace('YYYY', date.y).replace('MM', date.m).replace('DD', date.d);
+			return format.replace('YYYY', result.y).replace('MM', result.m).replace('DD', result.d);
 		}
 	}
-	function _db(num) {					// double-digit
-		num = Number(num)
-		num = num > 9 ? num : '0' + num;
-		return num.toString()
+	function _db(num) {											// double-digit
+		return num > 9 ? num.toString() : '0' + (num | 0);
 	}
-	function _creSelectDom(id, val) {
-		let div = document.createElement('div');
-		div.className = 'select-box';
-		div.innerHTML = `<button class=\"handler-btn icon icon-arrow-left\" data-handle=\"minus\"></button><input id=${id} value=${val}></input><button class=\"handler-btn icon icon-arrow-right\" data-handle=\"plus\"></button>`
-		return div;
-	}
-	function _creWeekDom() {
-		let weekHead = document.createElement('ul');
-		weekHead.id = 'calendar-week-head';
-		weekHead.innerHTML = `<li title=\"Sunday\">Sun</li><li>Mon</li><li>Tue</li><li>Wed</li><li>Thu</li><li>Fri</li><li>Sat</li>`
-		let div = document.createElement('div');
-		div.id = 'calendar-week';
-		div.appendChild(weekHead);
-
-		return div;
-	}
-	function _inArray(ele, arr) {
-		let n = arr.length;
-		if (n > 0) {
-			for (let i = 0; i < n; i ++) {
-				if (ele === arr[i]) return i;
-			}
+	function _isTarget(target, collection) {					// check if target is in HTMLCollection
+		if (typeof collection == 'string') {
+			collection = document.querySelectorAll(collection);
 		}
-		return -1;
+		var index = Array.prototype.slice.call(collection).indexOf(target);
+		return index > -1;
 	}
-	NodeList.prototype._removeClass =
-	HTMLCollection.prototype._removeClass = function(str) {
-		let nodes = this;
-		for (let i = 0, n = nodes.length; i < n; i ++) {
-			nodes[i].classList.remove(str);
+	NodeList.prototype._removeClass = function(str) {
+		var nodes = this;
+		for (let node of nodes) {
+			node.classList.remove(str);
 		}
 	}
 
 
-
+	// exports
 	if (typeof module === 'object' && module && typeof module.exports === 'object') {
 		module.exports = Calendar;
 	}else {
-		window.Calendar = Calendar;
 		if (typeof define === 'function' && define.amd) {
 			define(function() {
 				return Calendar;
 			})
+		}else {
+			window.Calendar = Calendar;
 		}
 	}
 })()
