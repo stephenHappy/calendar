@@ -12,7 +12,7 @@
 	<main>
 		<h4 id="title">Canlendar</h4>
 		<input id="dateInput" class="date-input" type="text" readonly placeholder="选择起始日期">
-		<!-- <input class="date-input" type="text" readonly placeholder="选择终止日期"> -->
+		<input id='dateInputEnd' class="date-input" type="text" readonly placeholder="选择终止日期"> 
 	</main>
 </body>
 <script src="c.js"></script>
@@ -21,11 +21,29 @@
 		selector: '#dateInput',
 		// defaultDate: '2011-11-11',
 		date: new Date(),
-		// min: '2016-05-05',
+		min: '2016-05-05',
+		max: new Date(),
+		// type: 'double',
+		// selector: '.date-input'
+		onclose:(date) => {
+			myCalendar2._option('min',date);
+		}
+	});
+
+	var myCalendar2 = new Calendar({
+		selector: '#dateInputEnd',
+		// defaultDate: '2011-11-11',
+		date: new Date(),
+		min: new Date(),
 		max: '2016-05-20',
 		// type: 'double',
 		// selector: '.date-input'
+		onclose:(date) => {
+			myCalendar._option('max',date);
+		}
 	});
+
+
 	// document.getElementById('dateInput').click();
 </script>
 </html>

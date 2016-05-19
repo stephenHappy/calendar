@@ -6,18 +6,18 @@
  *
  *	@liupd
  */
-
 ;(function() {
 	'use strict';
 	const CONFIG = {
 		type: 'single',					// type: single, double
 		date: new Date(),				// default date
-		sdate: new Date(),				// default start date
-		edate: new Date(),				// default end date
+		// sdate: new Date(),				// default start date
+		// edate: new Date(),				// default end date
 		min: null,						// min date
 		max: null,						// max date
 		// limit:	null,					// date interval limit
-		weeks: ['柒', '壹', '贰', '叁', '肆', '伍', '陆']
+		weeks: ['柒', '壹', '贰', '叁', '肆', '伍', '陆'],
+		onclose:() => {}                //@沛东 个人想法是做一个比较好，你想做double的话也可以，反正都需要onclose，自己加还是用户加的区别，可酌情使用 
 	}
 
 	class Calendar{
@@ -32,10 +32,21 @@
 
 			me.date = _formatDate(me.config.date, 'YYYY-MM-DD');
 
-			me.dom.addEventListener('click', function(e) {
-				me.input = e.target;
-				me._init();
+			me.config.max = me._optionToDate(me.config.max);
+			me.config.min = me._optionToDate(me.config.min);
+
+			me.dom.addEventListener('click', (e) => {
+				setTimeout(() => {
+					me.input = e.target;
+					me._init();
+				},0)
 			}, false)
+			//增加点击消失
+			document.body.addEventListener('click',() => {
+				if(me.calendar){
+					me._cancel();
+				}
+			},false) 
 		}
 		_init() {
 			var me = this;
@@ -82,7 +93,7 @@
 		_createDom() {
 			var me = this;
 			if (!!me.calendar) {
-				me.calendar.remove();
+				me._cancel();
 			}
 
 			var oYear  = me._createInputDom('year', me.defaultDate.y)
@@ -181,13 +192,24 @@
 			}
 			return oUl;
 		}
+		_optionToDate(value){
+			if(!value){
+				return;
+			}
+			if(Object.prototype.toString.call(value)=='[object Date]'){
+				return new Date(value.getFullYear(),value.getMonth(),value.getDate());
+			}else{
+				let arr = value.split('-');
+				return new Date(arr[0],arr[1]-1,arr[2]);
+			}
+		}
 		_dateValidity(y, m, d) {
 			var me = this;
 			if (!me.config.min && !me.config.max) {
 				return true;
 			}
 			var now = new Date(y, m-1, d);
-			return !(me.config.max && now > new Date(me.config.max) || me.config.min && now < new Date(me.config.min));
+			return !(me.config.max && now > me.config.max || me.config.min && now < me.config.min);
 		}
 		_position(calendar, target) {
 			// the calendar dom size is about 240 * 300, set in css
@@ -227,13 +249,14 @@
 					el = event[1],
 					fn = event[2];
 				let fun = function(e) {
+					e.stopPropagation(); //阻止冒泡
 					if (!_isTarget(e.target, el)) { return false };
 
 					me[fn].apply(me, [e])
 				}
 				me.calendar.removeEventListener(ev, fun, false);
 				me.calendar.addEventListener(ev, fun, false);
-			}
+			} 
 		}
 		_changeYearMonth(e) {
 			var me = this;
@@ -280,6 +303,17 @@
 		}
 		_cancel() {
 			this.calendar.remove();
+			this.calendar = void 0;
+			if(!!this.config.onclose && typeof this.config.onclose == 'function'){
+				this.config.onclose(_formatDate(this.defaultDate, 'YYYY-MM-DD'));
+			}
+		}
+		_option(key,value){
+			if(key=='max'||key=='min'){
+				this.config[key] = this._optionToDate(value);
+			}else{
+				this.config[key] = value;
+			}
 		}
 	}
 
@@ -344,7 +378,7 @@
 		return index > -1;
 	}
 	NodeList.prototype._removeClass = function(str) {
-		var nodes = this;
+		var nodes = Array.prototype.slice.call(this); //for of 遍历nodelist chrome 不支持  先转化成数组作为过渡方案
 		for (let node of nodes) {
 			node.classList.remove(str);
 		}
